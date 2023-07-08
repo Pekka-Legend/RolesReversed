@@ -6,7 +6,7 @@ canvas.height = 600;
 var mouseX = 0;
 var mouseY = 0;
 var isMouseDown = false;
-var mode = 0;
+var mode = 2;
 var placementType = 0;
 
 var spritesheet = new Image();
@@ -17,7 +17,7 @@ starSprite.src = "star.png"
 let rights = 3;
 let lefts = 0;
 let ups = 0;
-help = false;
+help = true;
 
 var level = 1;
 
@@ -181,12 +181,12 @@ class ItemHolder
             c.drawImage(spritesheet, 250, 0, 100, 50, this.x, this.y, 100, 50);
         }
         c.fillStyle = "white"
-        c.font = "30px Times"
+        c.font = "15px Arcade Normal"
         c.fillText(this.amount, this.x, this.y + 50)
         if (help)
         {
             c.fillStyle = "white"
-            c.font = "30px Times"
+            c.font = "15px Arcade Normal"
             c.fillText("KEY: " + String(this.type), this.x + 5, this.y)
         }
         
@@ -225,7 +225,7 @@ function LoadLevel(newLevel, resetPlatforms)
         player.y = 200;
         obstacles = [];
         goal = new Goal(500, 200);
-        tutorialText = "Click to Place Platforms";
+        tutorialText = "Click to place platforms";
 
         rights = 2;
         lefts = 0;
@@ -236,14 +236,26 @@ function LoadLevel(newLevel, resetPlatforms)
         player.x = 800;
         player.y = 400;
         obstacles = [];
-        goal = new Goal(200, 300);
-        tutorialText = 'Use the number keys to switch blocks or hold "?"';
+        goal = new Goal(200, 400);
+        tutorialText = 'Use the 1-3 keys to change platform types';
 
         rights = 0;
         lefts = 5;
         ups = 0;
     }
     else if (newLevel == 3)
+    {
+        player.x = 800;
+        player.y = 400;
+        obstacles = [];
+        goal = new Goal(200, 200);
+        tutorialText = 'You can vault up the sides of adjacent platforms';
+
+        rights = 0;
+        lefts = 5;
+        ups = 0;
+    }
+    else if (newLevel == 4)
     {
         player.x = 200;
         player.y = 350;
@@ -255,7 +267,19 @@ function LoadLevel(newLevel, resetPlatforms)
         lefts = 0;
         ups = 1;
     }
-    else if (newLevel == 4)
+    else if (newLevel == 5)
+    {
+        player.x = 600;
+        player.y = 400;
+        obstacles = []
+        goal = new Goal(600, 200)
+        tutorialText = "You can phase through the bottom of platforms up to the top"
+
+        rights = 3;
+        lefts = 0;
+        ups = 0;
+    }
+    else if (newLevel == 6)
     {
         player.x = 50;
         player.y = 100;
@@ -267,19 +291,19 @@ function LoadLevel(newLevel, resetPlatforms)
         lefts = 1;
         ups = 5;
     }
-    else if (newLevel == 5)
+    else if (newLevel == 7)
     {
         player.x = 1100;
         player.y = 500;
         obstacles = [new Obstacle(1085, 400, 10, 200)]
         goal = new Goal(50, 200)
-        tutorialText = "You must think below, then above the box for this one"
+        tutorialText = "You must think below the box, then above the box"
 
         rights = 0;
         lefts = 3;
         ups = 6;
     }
-    else if (newLevel == 6)
+    else if (newLevel == 8)
     {
         player.x = 300;
         player.y = 350;
@@ -291,7 +315,7 @@ function LoadLevel(newLevel, resetPlatforms)
         lefts = 2;
         ups = 1;
     }
-    else if (newLevel == 7)
+    else if (newLevel == 9)
     {
         player.x = 900;
         player.y = 500;
@@ -303,7 +327,7 @@ function LoadLevel(newLevel, resetPlatforms)
         lefts = 5;
         ups = 1;
     }
-    else if (newLevel == 8)
+    else if (newLevel == 10)
     {
         player.x = 200;
         player.y = 450;
@@ -315,7 +339,7 @@ function LoadLevel(newLevel, resetPlatforms)
         lefts = 4;
         ups = 1;
     }
-    else if (newLevel == 9)
+    else if (newLevel == 11)
     {
         player.x = 200;
         player.y = 430;
@@ -327,7 +351,7 @@ function LoadLevel(newLevel, resetPlatforms)
         lefts = 0;
         ups = 1;
     }
-    else if (newLevel == 10)
+    else if (newLevel == 12)
     {
         player.x = 800;
         player.y = 450;
@@ -339,9 +363,13 @@ function LoadLevel(newLevel, resetPlatforms)
         lefts = 6;
         ups = 4;
     }
+    else {
+        mode = 2;
+        level = 1;
+    }
     
 }
-LoadLevel(level, true)
+//LoadLevel(level, true)
 
 function animate()
 {
@@ -352,65 +380,78 @@ function animate()
 
     if (te >= ft)
     {
-        c.clearRect(0, 0, canvas.width, canvas.height);
-        c.fillStyle = 'green'
-        c.fillRect(0, 0, canvas.width, canvas.height);
-        if (mode == 1)
+        if (mode != 2)
         {
-            player.update(platforms, obstacles, goal);
-            if (player.y >= 600)
+            c.clearRect(0, 0, canvas.width, canvas.height);
+            c.fillStyle = 'green'
+            c.fillRect(0, 0, canvas.width, canvas.height);
+            if (mode == 1)
             {
-                mode = 0;
-                LoadLevel(level, true)
+                player.update(platforms, obstacles, goal);
+                if (player.y >= 600)
+                {
+                    mode = 0;
+                    LoadLevel(level, true)
+                }
+            }
+            player.draw();
+            platforms.forEach(platform =>{
+                platform.draw();
+            })
+    
+            obstacles.forEach(obstacle =>{
+                obstacle.draw();
+            })
+            goal.draw();
+            if (mode == 0) 
+            {
+                c.drawImage(spritesheet, 50 + placementType * 100, 0, 100, 50, mouseX - 50, mouseY - 25, 100, 50);
+                
+            }
+    
+            rightHolder.update(rights);
+            rightHolder.draw()
+    
+            leftHolder.update(lefts);
+            leftHolder.draw()
+    
+            upHolder.update(ups);
+            upHolder.draw()
+    
+            //draw tutorial text
+            c.fillStyle = "white"
+            c.font = "20px Arcade Normal"
+            textWidth = c.measureText(tutorialText).width;
+            c.fillText(tutorialText, 600 - textWidth / 2, 75)
+    
+            if (level == 1)
+            {
+                c.fillStyle = "white"
+                c.font = "15px Arcade Normal"
+                textWidth = c.measureText("Press enter to switch between play and edit modes").width;
+                c.fillText("Press enter to switch between play and edit modes", 600 - textWidth / 2, 120)
+    
+                c.font = "15px Arcade Normal"
+                textWidth = c.measureText("Press R to reset platforms").width;
+                c.fillText("Press R to reset platforms", 600 - textWidth / 2, 150)
+                
             }
         }
-        else {
-            
-            
+        else
+        {
+            c.clearRect(0, 0, 1200, 600)
+            c.fillStyle = "darkblue"
+            c.fillRect(0, 0, 1200, 600)
+            c.fillStyle = "white"
+            c.font = "50px Arcade Normal"
+            textWidth = c.measureText("You're the Platformer").width;
+            c.fillText("You're the Platformer", 600 - textWidth / 2, 120)
+
+            c.font = "30px Arcade Normal"
+            textWidth = c.measureText("Click to Play").width;
+            c.fillText("Click to Play", 600 - textWidth / 2, 400)
         }
         
-        player.draw();
-        platforms.forEach(platform =>{
-            platform.draw();
-        })
-
-        obstacles.forEach(obstacle =>{
-            obstacle.draw();
-        })
-        goal.draw();
-        if (mode == 0) 
-        {
-            c.drawImage(spritesheet, 50 + placementType * 100, 0, 100, 50, mouseX - 50, mouseY - 25, 100, 50);
-            
-        }
-
-        rightHolder.update(rights);
-        rightHolder.draw()
-
-        leftHolder.update(lefts);
-        leftHolder.draw()
-
-        upHolder.update(ups);
-        upHolder.draw()
-
-        //draw tutorial text
-        c.fillStyle = "white"
-        c.font = "50px Times"
-        textWidth = c.measureText(tutorialText).width;
-        c.fillText(tutorialText, 600 - textWidth / 2, 75)
-
-        if (level == 1)
-        {
-            c.fillStyle = "white"
-            c.font = "30px Times"
-            textWidth = c.measureText("Press enter to switch between play and edit modes").width;
-            c.fillText("Press enter to switch between play and edit modes", 600 - textWidth / 2, 120)
-
-            c.font = "20px Times"
-            textWidth = c.measureText("Press R to reset platforms").width;
-            c.fillText("Press R to reset platforms", 600 - textWidth / 2, 150)
-            
-        }
         te = 0;
     }
 }
@@ -427,25 +468,33 @@ document.onmousemove = function(e)
 
 document.onmousedown = function(e)
 {
-    //check if editing mode is active and the specific platform type is active and you have enough of that type to place one
-    if (mode == 0 && placementType == 0 && rights > 0)
+    if (mode != 2)
     {
-        rights -= 1;
-        platforms.push(new Platform(mouseX - 50, mouseY - 25, placementType + 1))
-        
+        //check if editing mode is active and the specific platform type is active and you have enough of that type to place one
+        if (mode == 0 && placementType == 0 && rights > 0)
+        {
+            rights -= 1;
+            platforms.push(new Platform(mouseX - 50, mouseY - 25, placementType + 1))
+            
+        }
+
+        if (mode == 0 && placementType == 1 && lefts > 0)
+        {
+            platforms.push(new Platform(mouseX - 50, mouseY - 25, placementType + 1))
+            lefts -= 1;
+        }
+
+        if (mode == 0 && placementType == 2 && ups > 0)
+        {
+            platforms.push(new Platform(mouseX - 50, mouseY - 25, placementType + 1))
+            ups -= 1;
+        }
+    }
+    else
+    {
+        LoadLevel(level, true);
     }
     
-    if (mode == 0 && placementType == 1 && lefts > 0)
-    {
-        platforms.push(new Platform(mouseX - 50, mouseY - 25, placementType + 1))
-        lefts -= 1;
-    }
-    
-    if (mode == 0 && placementType == 2 && ups > 0)
-    {
-        platforms.push(new Platform(mouseX - 50, mouseY - 25, placementType + 1))
-        ups -= 1;
-    }
     
 }
 
@@ -485,6 +534,6 @@ document.onkeyup = function(e)
 {
     if (e.key == "?")
     {
-        help = false;
+        help = true;
     }
 }
