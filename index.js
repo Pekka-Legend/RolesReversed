@@ -315,6 +315,30 @@ function LoadLevel(newLevel, resetPlatforms)
         lefts = 4;
         ups = 1;
     }
+    else if (newLevel == 9)
+    {
+        player.x = 200;
+        player.y = 430;
+        obstacles = [new Obstacle(400, 200, 10, 200), new Obstacle(0, 400, 1200, 10)]
+        goal = new Goal(500, 325)
+        tutorialText = ""
+
+        rights = 1;
+        lefts = 0;
+        ups = 1;
+    }
+    else if (newLevel == 10)
+    {
+        player.x = 800;
+        player.y = 450;
+        obstacles = [new Obstacle(600, 0, 10, 1200), new Obstacle(0, 400, 1200, 10)]
+        goal = new Goal(200, 325)
+        tutorialText = "Think outside the box"
+
+        rights = 0;
+        lefts = 6;
+        ups = 4;
+    }
     
 }
 LoadLevel(level, true)
@@ -337,7 +361,7 @@ function animate()
             if (player.y >= 600)
             {
                 mode = 0;
-                LoadLevel(level, false)
+                LoadLevel(level, true)
             }
         }
         else {
@@ -374,6 +398,19 @@ function animate()
         c.font = "50px Times"
         textWidth = c.measureText(tutorialText).width;
         c.fillText(tutorialText, 600 - textWidth / 2, 75)
+
+        if (level == 1)
+        {
+            c.fillStyle = "white"
+            c.font = "30px Times"
+            textWidth = c.measureText("Press enter to switch between play and edit modes").width;
+            c.fillText("Press enter to switch between play and edit modes", 600 - textWidth / 2, 120)
+
+            c.font = "20px Times"
+            textWidth = c.measureText("Press R to reset platforms").width;
+            c.fillText("Press R to reset platforms", 600 - textWidth / 2, 150)
+            
+        }
         te = 0;
     }
 }
@@ -414,21 +451,18 @@ document.onmousedown = function(e)
 
 document.onkeydown = function(e)
 {
-    if (e.key == "Enter")
+    if (e.key == "Enter" && mode == 0)
     {
-        mode = !mode;
+        mode = 1
+    }
+    else if (e.key == "Enter" && mode == 1)
+    {
+        LoadLevel(level, true)
+        mode = 0;
     }
     if (e.key == "r" && mode == 0)
     {
         LoadLevel(level, true)
-    }
-    if (e.key == "r" && mode == 1)
-    {
-        player.x = 50;
-        player.y = 50;
-        player.yVel = 0;
-        player.xVel = 0;
-        player.xDirection = 0;
     }
     if (e.code == "Digit1")
     {
