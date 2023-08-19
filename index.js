@@ -18,8 +18,11 @@ let rights = 3;
 let lefts = 0;
 let ups = 0;
 help = true;
+var hHeld = false;
 
 var level = 1;
+var extraPlatforms = 0;
+
 
 class Player
 {
@@ -32,6 +35,7 @@ class Player
         this.xDirection = 0;
         this.xVel = 0;
         this.yVel = 0;
+        this.goalWait = 0;
     }
 
     draw()
@@ -50,11 +54,35 @@ class Player
             
             if (this.x + this.width >= platform.x && this.x <= platform.x + platform.width && this.y + this.height >= platform.y && this.y <= platform.y + platform.height)
             {
+                if (this.yVel < 0)
+                {
+                    this.goalWait = 8;
+                    this.prevY = this.y;
+                    this.step = (platform.y - (this.y + this.height))
+                    
+                }
+                if (this.y + this.height / 2 > platform.y )
+                {
+                    this.goalWait = 8;
+                    this.step = (platform.y - (this.y + this.height))
+                    
+                }
                 this.yVel = 0;
+                if (this.goalWait > 0)
+                {
+                    this.y += this.step / (9 -  this.goalWait / 8);
+                }
+                else {
                 while (this.x + this.width >= platform.x && this.x <= platform.x + platform.width && this.y + this.height >= platform.y && this.y <= platform.y + platform.height)
                 {
                     this.y -= .1;
                 }
+                if (platform.type == 3)
+                {
+                    this.yVel = -20;
+                }
+                }
+                
                 if (platform.type == 1)
                 {
                     this.xDirection = 1;
@@ -63,27 +91,31 @@ class Player
                 {
                     this.xDirection = -1;
                 }
-                if (platform.type == 3)
-                {
-                    this.yVel = -20;
-                }
+                
+                
+                
             }
             
         })
         obstacles.forEach(obstacle =>{
-            if (this.x + this.width >= obstacle.x && this.x <= obstacle.x + obstacle.width && this.y + this.height >= obstacle.y && this.y <= obstacle.y + obstacle.height)
+            if (this.x + this.width >= obstacle.x && this.x <= obstacle.x + obstacle.width && this.y + this.height >= obstacle.y && this.y <= obstacle.y + obstacle.height && this.goalWait <= 0)
             {
                 //animate loop says that if y > 600 go back to edit mode so I set the y to a much lower value than 600 to be safe
                 this.y = 800
             }
         })
-        if (this.x + this.width >= goal.x && this.x <= goal.x + goal.width && this.y + this.height >= goal.y && this.y <= goal.y + goal.height)
+        if (this.x + this.width >= goal.x && this.x <= goal.x + goal.width && this.y + this.height >= goal.y && this.y <= goal.y + goal.height && this.goalWait <= 0)
         {
             level += 1;
+            extraPlatforms += (rights + lefts + ups + platforms.length) - (platforms.length);
             LoadLevel(level, true);
         }
-        this.x += this.xVel;
-        this.y += this.yVel;
+        if (this.goalWait <= 0)
+        {
+            this.x += this.xVel;
+            this.y += this.yVel;
+        }
+        
         
         
     }
@@ -206,6 +238,9 @@ var rightHolder = new ItemHolder(50, 520, 1, 0)
 var leftHolder = new ItemHolder(170, 520, 2, 0)
 var upHolder = new ItemHolder(290, 520, 3, 0)
 
+song = new Audio("hero-80s-127027.mp3")
+
+
 te = 0
 ft = 16
 ct = Date.now()
@@ -225,11 +260,12 @@ function LoadLevel(newLevel, resetPlatforms)
         player.y = 200;
         obstacles = [];
         goal = new Goal(500, 200);
-        tutorialText = "Click to place platforms";
+        tutorialText = "Get the player to the star";
 
         rights = 2;
         lefts = 0;
         ups = 0;
+        extraPlatforms = 0;
     }
     else if (newLevel == 2)
     {
@@ -249,7 +285,7 @@ function LoadLevel(newLevel, resetPlatforms)
         player.y = 400;
         obstacles = [];
         goal = new Goal(200, 200);
-        tutorialText = 'You can vault up the sides of adjacent platforms';
+        tutorialText = 'You can climb up the sides of adjacent platforms';
 
         rights = 0;
         lefts = 5;
@@ -269,15 +305,15 @@ function LoadLevel(newLevel, resetPlatforms)
     }
     else if (newLevel == 5)
     {
-        player.x = 600;
-        player.y = 400;
+        player.x = 800;
+        player.y = 450;
         obstacles = []
-        goal = new Goal(600, 200)
-        tutorialText = "You can phase through the bottom of platforms up to the top"
+        goal = new Goal(800, 160)
+        tutorialText = "You can phase through the bottom of platforms"
 
-        rights = 3;
+        rights = 1;
         lefts = 0;
-        ups = 0;
+        ups = 1;
     }
     else if (newLevel == 6)
     {
@@ -297,7 +333,7 @@ function LoadLevel(newLevel, resetPlatforms)
         player.y = 500;
         obstacles = [new Obstacle(1085, 400, 10, 200)]
         goal = new Goal(50, 200)
-        tutorialText = "You must think below the box, then above the box"
+        tutorialText = "Phasing might help here"
 
         rights = 0;
         lefts = 3;
@@ -321,7 +357,7 @@ function LoadLevel(newLevel, resetPlatforms)
         player.y = 500;
         obstacles = [new Obstacle(0, 400, 1200, 10)]
         goal = new Goal(300, 200)
-        tutorialText = ""
+        tutorialText = "You can't go over it, you can't go under it"
 
         rights = 0;
         lefts = 5;
@@ -333,7 +369,7 @@ function LoadLevel(newLevel, resetPlatforms)
         player.y = 450;
         obstacles = [new Obstacle(600, 200, 10, 200), new Obstacle(0, 400, 600, 10), new Obstacle(0, 200, 600, 10)]
         goal = new Goal(50, 50)
-        tutorialText = ""
+        tutorialText = "Think Inside the Box"
 
         rights = 3;
         lefts = 4;
@@ -345,7 +381,7 @@ function LoadLevel(newLevel, resetPlatforms)
         player.y = 430;
         obstacles = [new Obstacle(400, 200, 10, 200), new Obstacle(0, 400, 1200, 10)]
         goal = new Goal(500, 325)
-        tutorialText = ""
+        tutorialText = "Don't give up too quick"
 
         rights = 1;
         lefts = 0;
@@ -364,7 +400,7 @@ function LoadLevel(newLevel, resetPlatforms)
         ups = 4;
     }
     else {
-        mode = 2;
+        mode = 3;
         level = 1;
     }
     
@@ -373,6 +409,7 @@ function LoadLevel(newLevel, resetPlatforms)
 
 function animate()
 {
+    song.play();
     st = ct
     requestAnimationFrame(animate);
     ct = Date.now()
@@ -380,7 +417,7 @@ function animate()
 
     if (te >= ft)
     {
-        if (mode != 2)
+        if (mode != 2 && mode != 3)
         {
             c.clearRect(0, 0, canvas.width, canvas.height);
             c.fillStyle = 'green'
@@ -388,6 +425,7 @@ function animate()
             if (mode == 1)
             {
                 player.update(platforms, obstacles, goal);
+                player.goalWait -= 1;
                 if (player.y >= 600)
                 {
                     mode = 0;
@@ -403,11 +441,7 @@ function animate()
                 obstacle.draw();
             })
             goal.draw();
-            if (mode == 0) 
-            {
-                c.drawImage(spritesheet, 50 + placementType * 100, 0, 100, 50, mouseX - 50, mouseY - 25, 100, 50);
-                
-            }
+            
     
             rightHolder.update(rights);
             rightHolder.draw()
@@ -428,16 +462,43 @@ function animate()
             {
                 c.fillStyle = "white"
                 c.font = "15px Arcade Normal"
-                textWidth = c.measureText("Press enter to switch between play and edit modes").width;
-                c.fillText("Press enter to switch between play and edit modes", 600 - textWidth / 2, 120)
+                textWidth = c.measureText("Click to Place Platforms").width;
+                c.fillText("Click to Place Platforms", 600 - textWidth / 2, 120)
     
                 c.font = "15px Arcade Normal"
-                textWidth = c.measureText("Press R to reset platforms").width;
-                c.fillText("Press R to reset platforms", 600 - textWidth / 2, 150)
+                textWidth = c.measureText("Hold H for controls and instructions").width;
+                c.fillText("Hold H for controls and instructions", 600 - textWidth / 2, 150)
+                
+            }
+
+            if (hHeld)
+            {
+                c.fillStyle = "gray"
+                c.fillRect(200, 100, 800, 400);
+                c.fillStyle = "black"
+                c.font = "20px Arcade Normal"
+                c.fillText("Controls:", 210, 130)
+                c.font = "15px Arcade Normal"
+                c.fillText("1: Switch to Move Right Platform", 210, 150)
+                c.fillText("2: Switch to Move Left Platform", 210, 170)
+                c.fillText("3: Switch to Jump Platform", 210, 190)
+                c.fillText("Enter: Switch between play and edit modes", 210, 210)
+                c.fillText("R: Reset all platforms (edit mode only)", 210, 230)
+                c.fillText("Q: Exit to title screen", 210, 250)
+                c.fillText("Click: Places the selected platform type", 210, 270)
+                c.font = "20px Arcade Normal"
+                c.fillText("Instructions: ", 210, 310)
+                c.font = "15px Arcade Normal"
+                c.fillText("Get the player to the star to complete each level", 210, 330)
+                c.fillText("All unused platforms are added into your score", 210, 350)
+            }
+            if (mode == 0) 
+            {
+                c.drawImage(spritesheet, 50 + placementType * 100, 0, 100, 50, mouseX - 50, mouseY - 25, 100, 50);
                 
             }
         }
-        else
+        else if (mode == 2)
         {
             c.clearRect(0, 0, 1200, 600)
             c.fillStyle = "darkblue"
@@ -450,6 +511,24 @@ function animate()
             c.font = "30px Arcade Normal"
             textWidth = c.measureText("Click to Play").width;
             c.fillText("Click to Play", 600 - textWidth / 2, 400)
+        }
+        else if (mode == 3)
+        {
+            c.clearRect(0, 0, 1200, 600)
+            c.fillStyle = "darkblue"
+            c.fillRect(0, 0, 1200, 600)
+            c.fillStyle = "white"
+            c.font = "60px Arcade Normal"
+            textWidth = c.measureText("You Win!").width;
+            c.fillText("You Win!", 600 - textWidth / 2, 150)
+
+            c.font = "25px Arcade Normal"
+            textWidth = c.measureText("Click to play again").width;
+            c.fillText("Click to play again", 600 - textWidth / 2, 500)
+
+            c.font = "20px Arcade Normal"
+            
+            c.fillText("Score: " + extraPlatforms, 20, 550)
         }
         
         te = 0;
@@ -468,7 +547,7 @@ document.onmousemove = function(e)
 
 document.onmousedown = function(e)
 {
-    if (mode != 2)
+    if (mode != 2 && mode != 3)
     {
         //check if editing mode is active and the specific platform type is active and you have enough of that type to place one
         if (mode == 0 && placementType == 0 && rights > 0)
@@ -490,9 +569,13 @@ document.onmousedown = function(e)
             ups -= 1;
         }
     }
-    else
+    else if (mode == 2)
     {
         LoadLevel(level, true);
+    }
+    else {
+        mode = 2;
+        level = 1;
     }
     
     
@@ -529,11 +612,24 @@ document.onkeydown = function(e)
     {
         help = true;
     }
+    if (e.key == "q")
+    {
+        mode = 2
+        level = 1;
+    }
+    if (e.key == "h")
+    {
+        hHeld = true;
+    }
 }
 document.onkeyup = function(e)
 {
     if (e.key == "?")
     {
         help = true;
+    }
+    if (e.key == "h")
+    {
+        hHeld = false;
     }
 }
